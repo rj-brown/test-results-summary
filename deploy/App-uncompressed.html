@@ -65,6 +65,7 @@
         	    "FormattedID", 
             	"Name",
             	"Type",
+            	"LastRun",
             	"LastVerdict"
         	],
             limit: Infinity,
@@ -76,7 +77,6 @@
        });
     },
     _onDataLoaded: function(store, data) {
-        console.log('data loaded');
         this._makeGrid(data);
     },
     
@@ -98,6 +98,8 @@
                     text: "Name", dataIndex: "Name", flex: 1
                 }, {
                     text: "Type", dataIndex: "Type"
+                }, {
+                    text: "Date of Last Run", dataIndex: "LastRun"
                 }, {
                     text: "Run Pass/Fail", dataIndex: "LastVerdict"
                 }

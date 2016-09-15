@@ -56,6 +56,7 @@ Ext.define('CustomApp', {
         	    "FormattedID", 
             	"Name",
             	"Type",
+            	"LastRun",
             	"LastVerdict"
         	],
             limit: Infinity,
@@ -67,7 +68,6 @@ Ext.define('CustomApp', {
        });
     },
     _onDataLoaded: function(store, data) {
-        console.log('data loaded');
         this._makeGrid(data);
     },
     
@@ -89,6 +89,8 @@ Ext.define('CustomApp', {
                     text: "Name", dataIndex: "Name", flex: 1
                 }, {
                     text: "Type", dataIndex: "Type"
+                }, {
+                    text: "Date of Last Run", dataIndex: "LastRun"
                 }, {
                     text: "Run Pass/Fail", dataIndex: "LastVerdict"
                 }
