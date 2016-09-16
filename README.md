@@ -1,12 +1,11 @@
-TestCaseApp
-=========================
+Test Results Summary
 
 ## Overview
 
 
 ## License
 
-TestCaseApp is released under the MIT license.  See the file [LICENSE](./LICENSE) for the full text.
+Test Results Summary is released under the MIT license.  See the file [LICENSE](./LICENSE) for the full text.
 
 ##Documentation for SDK
 
