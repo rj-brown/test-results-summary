@@ -13,12 +13,13 @@
     items: [
         {
             xtype: 'container',
-            itemId: 'exportBtn'
+            itemId: 'exportBtn',
+            cls: 'export-button'
         },
         {
             xtype: 'container',
             itemId: 'milestoneCombobox',
-            label: 'test'
+            cls: 'milestone-combo-box'
         },
         {
             xtype: 'container',
@@ -45,16 +46,17 @@
         return {
             property: 'Milestones',
             operator: '=',
-            value: this.down('#stateComboBox').getValue()
+            value: this.down('#stateComboBox').getRawValue()
         };
     },
     _onSelect: function() {
-        // this._grid.store.filter(this._getStateFilter());
-        var grid = this.down('rallygrid'),
-            store = grid.getStore();
+        var store = this._grid.getStore();
     
         store.clearFilter(true);
-        store.filter(this._getStateFilter());
+        console.log(this.down('#stateComboBox'));
+        if (this.down('#stateComboBox').getRawValue() !== "-- No Entry --") {
+            store.filter(this._getStateFilter());
+        }
     },
    _initStore: function() {
         Ext.create('Rally.data.wsapi.Store', {
@@ -66,10 +68,11 @@
             	"Name",
             	"Type",
             	"LastRun",
-            	"LastVerdict"
+            	"LastVerdict",
+            	"LastBuild",
+            	"WorkProduct"
         	],
             limit: Infinity,
-            // filters: this._getStateFilter,
             listeners: {
                 load: this._onDataLoaded,
                 scope:this
@@ -78,30 +81,42 @@
     },
     _onDataLoaded: function(store, data) {
         this._makeGrid(data);
+        console.log(data);
     },
     
     _makeGrid:function(testcases){
         this._myMask.hide();
         var store = Ext.create('Rally.data.custom.Store', {
-            data: testcases  
+            data: testcases,
+            proxy: {
+                type:'memory'
+            }
         });
         this._testcases = testcases;
         this._grid = Ext.create('Rally.ui.grid.Grid',{
             itemId: 'testcasesGrid',
             store: store,
             showRowActionsColumn: false,
+            showPagingToolbar: false,
             columnCfgs: [
                 { 
-                	text: "ID", dataIndex: "FormattedID", xtype: "templatecolumn",
+                	text: "Test Case ID", dataIndex: "FormattedID", xtype: "templatecolumn",
                 	tpl: Ext.create("Rally.ui.renderer.template.FormattedIDTemplate"),
                 }, {
-                    text: "Name", dataIndex: "Name", flex: 1
+                    text: "Test Case Name", dataIndex: "Name", flex: 1
                 }, {
-                    text: "Type", dataIndex: "Type"
+                    text: "Test Case Type", dataIndex: "Type"
                 }, {
-                    text: "Date of Last Run", dataIndex: "LastRun"
+                    text: "Work Product ID", dataIndex: "WorkProduct",
+                    renderer: function(value) {
+                        return value ? '<a href="' + Rally.nav.Manager.getDetailUrl(value) + '">' + value.FormattedID + "</a>" : void 0;
+                    }
                 }, {
-                    text: "Run Pass/Fail", dataIndex: "LastVerdict"
+                    text: "Test Case Last Run", dataIndex: "LastRun"
+                }, {
+                    text: "Test Case Last Build", dataIndex: "LastBuild"
+                }, {
+                    text: "Test Case Last Verdict", dataIndex: "LastVerdict"
                 }
             ]
         });
@@ -121,38 +136,20 @@
     
     _getCSV: function () {
         var cols    = this._grid.columns;
-        var store   = this._grid.store;
         var data = '';
         
-        _.each(cols, function(col, index) {
+        _.each(cols, function(col) {
             data += this._getFieldTextAndEscape(col.text) + ',';
         },this);
         
         data += "\r\n";
         _.each(this._testcases, function(record) {
-            // var featureData = record["Feature"];
-            _.each(cols, function(col, index) {
-                var text = '';
+            _.each(cols, function(col) {
                 var fieldName   = col.dataIndex;
-                // if (fieldName === "Feature" && featureData) {
-                //     text = featureData.FormattedID;
-                // } else if (fieldName === "TestCaseCount") {
-                //     text = record[fieldName].toString();
-                // } else if (fieldName === "TestCases"){
-                //     var textArr = [];
-                //     _.each(record[fieldName], function(testcase, index) {
-                //         textArr.push(testcase.FormattedID);
-                //     });
-                //     text = textArr.join(', ');
-                // } else{
-                    text = record.get(fieldName);
-                // }
-                
-                data += this._getFieldTextAndEscape(text) + ',';
-
-            },this);
+                data += this._getFieldTextAndEscape(record.get(fieldName)) + ',';
+            }, this);
             data += "\r\n";
-        },this);
+        }, this);
 
         return data;
     },
@@ -196,6 +193,19 @@
     <style type="text/css">
         .app {
   /* Add app styles here */
+}
+.export-button {
+  display: inline;
+  float: left;
+  width: 100px;
+}
+.milestone-combo-box {
+  display: inline;
+  float: left;
+  width: 160px;
+}
+.x-panel-body {
+  height: auto !important;
 }
 
     </style>

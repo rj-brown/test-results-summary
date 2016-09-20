@@ -1,3 +1,16 @@
 .app {
      /* Add app styles here */
 }
+.export-button {
+    display: inline;
+    float: left;
+    width: 100px;
+}
+.milestone-combo-box {
+    display: inline;
+    float: left;
+    width: 160px;
+}
+.x-panel-body {
+    height: auto !important;
+}
