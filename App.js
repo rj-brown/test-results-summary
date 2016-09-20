@@ -44,7 +44,6 @@ Ext.define('CustomApp', {
         var store = this._grid.getStore();
     
         store.clearFilter(true);
-        console.log(this.down('#stateComboBox'));
         if (this.down('#stateComboBox').getRawValue() !== "-- No Entry --") {
             store.filter(this._getStateFilter());
         }
@@ -72,7 +71,6 @@ Ext.define('CustomApp', {
     },
     _onDataLoaded: function(store, data) {
         this._makeGrid(data);
-        console.log(data);
     },
     
     _makeGrid:function(testcases){
@@ -107,7 +105,7 @@ Ext.define('CustomApp', {
                 }, {
                     text: "Test Case Last Build", dataIndex: "LastBuild"
                 }, {
-                    text: "Test Case Last Verdict", dataIndex: "LastVerdict"
+                    text: "Test Case Last Verdict", dataIndex: "LastVerdict", sortable: false
                 }
             ]
         });
