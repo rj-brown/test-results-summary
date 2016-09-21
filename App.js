@@ -35,7 +35,7 @@ Ext.define('CustomApp', {
    },
     _getStateFilter: function() {
         return {
-            property: 'Milestones',
+            property: 'WorkProductMilestone',
             operator: '=',
             value: this.down('#stateComboBox').getRawValue()
         };
@@ -46,6 +46,8 @@ Ext.define('CustomApp', {
         store.clearFilter(true);
         if (this.down('#stateComboBox').getRawValue() !== "-- No Entry --") {
             store.filter(this._getStateFilter());
+        } else {
+            store.reload();
         }
     },
    _initStore: function() {
@@ -71,6 +73,17 @@ Ext.define('CustomApp', {
        });
     },
     _onDataLoaded: function(store, data) {
+        _.each(data, function(testcase) {
+            if(testcase.data.WorkProduct) {
+                var testCaseMilestones = [];
+                _.each(testcase.data.WorkProduct.Milestones._tagsNameArray, function(milestone) {
+                    testCaseMilestones.push(milestone.Name);
+                }, this);
+                var workProductMilestone = testCaseMilestones.join(', ');
+                testcase.set('WorkProductMilestone', workProductMilestone);
+                testcase.set('WorkProductNumericID', Number(testcase.data.WorkProduct.FormattedID.replace(/\D+/g, '')));
+            }
+        });
         this._makeGrid(data);
     },
     
@@ -100,6 +113,9 @@ Ext.define('CustomApp', {
                     text: "Work Product ID", dataIndex: "WorkProduct",
                     renderer: function(value) {
                         return value ? '<a href="' + Rally.nav.Manager.getDetailUrl(value) + '">' + value.FormattedID + "</a>" : void 0;
+                    },
+                    getSortParam: function() {
+                        return "WorkProductNumericID";  
                     }
                 }, {
                     text: "Test Case Last Run", dataIndex: "LastRun"
