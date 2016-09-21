@@ -60,7 +60,8 @@ Ext.define('CustomApp', {
             	"LastRun",
             	"LastVerdict",
             	"LastBuild",
-            	"WorkProduct"
+            	"WorkProduct",
+            	"Milestones"
         	],
             limit: Infinity,
             listeners: {
@@ -129,18 +130,39 @@ Ext.define('CustomApp', {
         
         _.each(cols, function(col) {
             data += this._getFieldTextAndEscape(col.text) + ',';
-        },this);
-        
+        }, this);
+        data += "Milestones,";
         data += "\r\n";
+
         _.each(this._testcases, function(record) {
             _.each(cols, function(col) {
-                var fieldName   = col.dataIndex;
-                data += this._getFieldTextAndEscape(record.get(fieldName)) + ',';
+                var fieldName = col.dataIndex;
+                if (fieldName ==="WorkProduct" && record.data.WorkProduct) {
+                    data += this._getFieldTextAndEscape(record.data.WorkProduct.FormattedID) + ',';
+                } else if (fieldName ==="LastRun") {
+                    var text = '';
+                    if (record.data.LastRun) {
+                        text = record.data.LastRun.toString();
+                    }
+                    data += this._getFieldTextAndEscape(text) + ',';
+                } else {
+                    data += this._getFieldTextAndEscape(record.get(fieldName)) + ',';
+                }
             }, this);
+            data += this._getMilestonesForCSV(record);
             data += "\r\n";
         }, this);
 
         return data;
+    },
+    _getMilestonesForCSV: function(testcases) {
+        var milestones = '';
+        if(testcases.data.WorkProduct) {
+            _.each(testcases.data.WorkProduct.Milestones._tagsNameArray, function(milestone) {
+                milestones += this._getFieldTextAndEscape(milestone.Name) + ' ';
+            }, this);
+        }
+        return milestones;
     },
     _getFieldTextAndEscape: function(fieldData) {
         var string  = this._getFieldText(fieldData);  
