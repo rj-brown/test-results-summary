@@ -63,13 +63,25 @@ Ext.define('CustomApp', {
             	"LastVerdict",
             	"LastBuild",
             	"WorkProduct",
-            	"Milestones"
+            	"Milestones",
+            	"Defects"
         	],
             limit: Infinity,
             listeners: {
                 load: this._onDataLoaded,
                 scope:this
             }
+        });
+       
+        this._defectsStore = Ext.create('Rally.data.wsapi.Store', {
+            model: 'Defect',
+            autoLoad: true,
+            remoteSort: false,
+            fetch:[
+            	"FormattedID",
+            	"State"
+        	],
+            limit: Infinity
        });
     },
     _onDataLoaded: function(store, data) {
@@ -83,7 +95,16 @@ Ext.define('CustomApp', {
                 testcase.set('WorkProductMilestone', workProductMilestone);
                 testcase.set('WorkProductNumericID', Number(testcase.data.WorkProduct.FormattedID.replace(/\D+/g, '')));
             }
-        });
+            if (testcase.data.Defects && testcase.data.LastVerdict === "Fail" && testcase.data.Defects.Count > 0) {
+                var defectHtml = [];
+                _.each(this._defectsStore.data.items, function(defect){
+                    if (defect.data.State === "Open") {
+                        defectHtml.push('<a href="' + Rally.nav.Manager.getDetailUrl(defect) + '">' + defect.data.FormattedID + "</a>");
+                    }
+                }, this);
+                testcase.set('OpenDefects', defectHtml.join("</br>"));
+            }
+        }, this);
         this._makeGrid(data);
     },
     
@@ -123,6 +144,8 @@ Ext.define('CustomApp', {
                     text: "Test Case Last Build", dataIndex: "LastBuild"
                 }, {
                     text: "Test Case Last Verdict", dataIndex: "LastVerdict", sortable: false
+                }, {
+                    text: "Defects", dataIndex: "OpenDefects"
                 }
             ]
         });
