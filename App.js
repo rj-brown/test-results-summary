@@ -51,6 +51,18 @@ Ext.define('CustomApp', {
         }
     },
    _initStore: function() {
+        this._defectsStore = Ext.create('Rally.data.wsapi.Store', {
+            model: 'Defect',
+            autoLoad: true,
+            remoteSort: false,
+            fetch:[
+            	"FormattedID",
+            	"State",
+            	"TestCase"
+        	],
+            limit: Infinity
+        });
+       
         Ext.create('Rally.data.wsapi.Store', {
             model: 'TestCase',
             autoLoad: true,
@@ -72,17 +84,6 @@ Ext.define('CustomApp', {
                 scope:this
             }
         });
-       
-        this._defectsStore = Ext.create('Rally.data.wsapi.Store', {
-            model: 'Defect',
-            autoLoad: true,
-            remoteSort: false,
-            fetch:[
-            	"FormattedID",
-            	"State"
-        	],
-            limit: Infinity
-       });
     },
     _onDataLoaded: function(store, data) {
         _.each(data, function(testcase) {
@@ -95,11 +96,11 @@ Ext.define('CustomApp', {
                 testcase.set('WorkProductMilestone', workProductMilestone);
                 testcase.set('WorkProductNumericID', Number(testcase.data.WorkProduct.FormattedID.replace(/\D+/g, '')));
             }
-            if (testcase.data.Defects && testcase.data.LastVerdict === "Fail" && testcase.data.Defects.Count > 0) {
+            if (testcase.data.Defects && testcase.data.Defects.Count > 0) {
                 var defectHtml = [];
-                _.each(this._defectsStore.data.items, function(defect){
-                    if (defect.data.State === "Open") {
-                        defectHtml.push('<a href="' + Rally.nav.Manager.getDetailUrl(defect) + '">' + defect.data.FormattedID + "</a>");
+                _.each(this._defectsStore.data.items, function(defect) {
+                    if (defect.data.TestCase.FormattedID === testcase.data.FormattedID) {
+                        defectHtml.push('<a href="' + Rally.nav.Manager.getDetailUrl(defect) + '">' + defect.data.FormattedID + "</a> - " + defect.data.State);
                     }
                 }, this);
                 testcase.set('OpenDefects', defectHtml.join("</br>"));
@@ -184,6 +185,15 @@ Ext.define('CustomApp', {
                         text = record.data.LastRun.toString();
                     }
                     data += this._getFieldTextAndEscape(text) + ',';
+                } else if (fieldName === "OpenDefects" && record.data.OpenDefects) {
+                    var text = '\"';
+                    _.each(this._defectsStore.data.items, function(defect) {
+                        if (defect.data.TestCase.FormattedID === record.data.FormattedID) {
+                            text += defect.data.FormattedID + ' - ' + defect.data.State + '\n';
+                        }
+                    }, this);
+                    text += '\"';
+                    data += text + ',';
                 } else {
                     data += this._getFieldTextAndEscape(record.get(fieldName)) + ',';
                 }
