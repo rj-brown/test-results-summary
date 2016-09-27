@@ -99,7 +99,7 @@ Ext.define('CustomApp', {
             if (testcase.data.Defects && testcase.data.Defects.Count > 0) {
                 var defectHtml = [];
                 _.each(this._defectsStore.data.items, function(defect) {
-                    if (defect.data.TestCase.FormattedID === testcase.data.FormattedID) {
+                    if (defect.data.TestCase && defect.data.TestCase.FormattedID === testcase.data.FormattedID) {
                         defectHtml.push('<a href="' + Rally.nav.Manager.getDetailUrl(defect) + '">' + defect.data.FormattedID + "</a> - " + defect.data.State);
                     }
                 }, this);
@@ -188,7 +188,7 @@ Ext.define('CustomApp', {
                 } else if (fieldName === "OpenDefects" && record.data.OpenDefects) {
                     var text = '\"';
                     _.each(this._defectsStore.data.items, function(defect) {
-                        if (defect.data.TestCase.FormattedID === record.data.FormattedID) {
+                        if (defect.data.TestCase && defect.data.TestCase.FormattedID === record.data.FormattedID) {
                             text += defect.data.FormattedID + ' - ' + defect.data.State + '\n';
                         }
                     }, this);
