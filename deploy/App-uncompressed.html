@@ -71,28 +71,29 @@
         	],
             limit: Infinity
         });
-       
-        Ext.create('Rally.data.wsapi.Store', {
-            model: 'TestCase',
-            autoLoad: true,
-            remoteSort: false,
-            fetch:[
-        	    "FormattedID", 
-            	"Name",
-            	"Type",
-            	"LastRun",
-            	"LastVerdict",
-            	"LastBuild",
-            	"WorkProduct",
-            	"Milestones",
-            	"Defects"
-        	],
-            limit: Infinity,
-            listeners: {
-                load: this._onDataLoaded,
-                scope:this
-            }
-        });
+       this._defectsStore.on('load',function () {
+            Ext.create('Rally.data.wsapi.Store', {
+                model: 'TestCase',
+                autoLoad: true,
+                remoteSort: false,
+                fetch:[
+            	    "FormattedID", 
+                	"Name",
+                	"Type",
+                	"LastRun",
+                	"LastVerdict",
+                	"LastBuild",
+                	"WorkProduct",
+                	"Milestones",
+                	"Defects"
+            	],
+                limit: Infinity,
+                listeners: {
+                    load: this._onDataLoaded,
+                    scope:this
+                }
+            });
+       },this);
     },
     _onDataLoaded: function(store, data) {
         _.each(data, function(testcase) {
@@ -189,11 +190,11 @@
                 if (fieldName ==="WorkProduct" && record.data.WorkProduct) {
                     data += this._getFieldTextAndEscape(record.data.WorkProduct.FormattedID) + ',';
                 } else if (fieldName ==="LastRun") {
-                    var text = '';
+                    var lastRunText = '';
                     if (record.data.LastRun) {
-                        text = record.data.LastRun.toString();
+                        lastRunText = record.data.LastRun.toString();
                     }
-                    data += this._getFieldTextAndEscape(text) + ',';
+                    data += this._getFieldTextAndEscape(lastRunText) + ',';
                 } else if (fieldName === "OpenDefects" && record.data.OpenDefects) {
                     var text = '\"';
                     _.each(this._defectsStore.data.items, function(defect) {
