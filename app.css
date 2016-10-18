@@ -3,13 +3,13 @@
 }
 .export-button {
     display: inline;
-    float: left;
+    float: right;
     width: 100px;
 }
-.milestone-combo-box {
+.release-combo-box {
     display: inline;
     float: left;
-    width: 160px;
+    width: 370px;
 }
 .x-panel-body {
     height: auto !important;

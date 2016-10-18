@@ -9,8 +9,8 @@ Ext.define('CustomApp', {
         },
         {
             xtype: 'container',
-            itemId: 'milestoneCombobox',
-            cls: 'milestone-combo-box'
+            itemId: 'releaseCombobox',
+            cls: 'release-combo-box'
         },
         {
             xtype: 'container',
@@ -21,11 +21,12 @@ Ext.define('CustomApp', {
         this._myMask = new Ext.LoadMask(Ext.getBody(), {msg:"Loading data..."});
         this._myMask.show();
         
-        this.down('#milestoneCombobox').add({
-            xtype: 'rallymilestonecombobox',
+        this.down('#releaseCombobox').add({
+            xtype: 'rallyreleasecombobox',
             itemId: 'stateComboBox',
             allowNoEntry: true,
-            model: ['TestCase'],
+            noEntryText: 'All Releases',
+            model: 'TestCase',
             listeners: {
                 scope: this,
                 select: this._onSelect,
@@ -33,19 +34,19 @@ Ext.define('CustomApp', {
             },
         });
    },
-    _getStateFilter: function() {
+    _getReleaseFilter: function() {
         return {
-            property: 'WorkProductMilestone',
+            property: 'Release',
             operator: '=',
-            value: this.down('#stateComboBox').getRawValue()
+            value: Number(this.down('#stateComboBox').getRawValue().split(' (')[0].replace(/\D+/g, ''))
         };
     },
     _onSelect: function() {
         var store = this._grid.getStore();
     
         store.clearFilter(true);
-        if (this.down('#stateComboBox').getRawValue() !== "-- No Entry --") {
-            store.filter(this._getStateFilter());
+        if (this.down('#stateComboBox').getRawValue() !== "All Releases") {
+            store.filter(this._getReleaseFilter());
         } else {
             store.reload();
         }
@@ -75,7 +76,7 @@ Ext.define('CustomApp', {
                 	"LastVerdict",
                 	"LastBuild",
                 	"WorkProduct",
-                	"Milestones",
+                	"c_Iteration",
                 	"Defects"
             	],
                 limit: Infinity,
@@ -88,13 +89,10 @@ Ext.define('CustomApp', {
     },
     _onDataLoaded: function(store, data) {
         _.each(data, function(testcase) {
+            if(testcase.data.c_Iteration) {
+                testcase.set('Release', Number(testcase.data.c_Iteration.split('.')[0].replace(/\D+/g, '')));
+            }
             if(testcase.data.WorkProduct) {
-                var testCaseMilestones = [];
-                _.each(testcase.data.WorkProduct.Milestones._tagsNameArray, function(milestone) {
-                    testCaseMilestones.push(milestone.Name);
-                }, this);
-                var workProductMilestone = testCaseMilestones.join(', ');
-                testcase.set('WorkProductMilestone', workProductMilestone);
                 testcase.set('WorkProductNumericID', Number(testcase.data.WorkProduct.FormattedID.replace(/\D+/g, '')));
             }
             if (testcase.data.Defects && testcase.data.Defects.Count > 0) {
@@ -135,7 +133,7 @@ Ext.define('CustomApp', {
                 }, {
                     text: "Work Product ID", dataIndex: "WorkProduct",
                     renderer: function(value) {
-                        return value ? '<a href="' + Rally.nav.Manager.getDetailUrl(value) + '">' + value.FormattedID + "</a>" : void 0;
+                        return value ? '<a href="' + Rally.nav.Manager.getDetailUrl(value) + '" target="_blank">' + value.FormattedID + "</a>" : void 0;
                     },
                     getSortParam: function() {
                         return "WorkProductNumericID";  
