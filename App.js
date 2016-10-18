@@ -43,7 +43,7 @@ Ext.define('CustomApp', {
     },
     _onSelect: function() {
         var store = this._grid.getStore();
-    
+
         store.clearFilter(true);
         if (this.down('#stateComboBox').getRawValue() !== "All Releases") {
             store.filter(this._getReleaseFilter());
@@ -51,34 +51,34 @@ Ext.define('CustomApp', {
             store.reload();
         }
     },
-   _initStore: function() {
+    _initStore: function() {
         this._defectsStore = Ext.create('Rally.data.wsapi.Store', {
             model: 'Defect',
             autoLoad: true,
             remoteSort: false,
             fetch:[
-            	"FormattedID",
-            	"State",
-            	"TestCase"
-        	],
+                "FormattedID",
+                "State",
+                "TestCase"
+            ],
             limit: Infinity
         });
-       this._defectsStore.on('load',function () {
+        this._defectsStore.on('load',function () {
             Ext.create('Rally.data.wsapi.Store', {
                 model: 'TestCase',
                 autoLoad: true,
                 remoteSort: false,
                 fetch:[
-            	    "FormattedID", 
-                	"Name",
-                	"Type",
-                	"LastRun",
-                	"LastVerdict",
-                	"LastBuild",
-                	"WorkProduct",
-                	"c_Iteration",
-                	"Defects"
-            	],
+                    "FormattedID", 
+                    "Name",
+                    "Type",
+                    "LastRun",
+                    "LastVerdict",
+                    "LastBuild",
+                    "WorkProduct",
+                    "c_Iteration",
+                    "Defects"
+                ],
                 limit: Infinity,
                 listeners: {
                     load: this._onDataLoaded,
@@ -107,8 +107,7 @@ Ext.define('CustomApp', {
         }, this);
         this._makeGrid(data);
     },
-    
-    _makeGrid:function(testcases){
+    _makeGrid: function(testcases){
         this._myMask.hide();
         var store = Ext.create('Rally.data.custom.Store', {
             data: testcases,
@@ -124,8 +123,8 @@ Ext.define('CustomApp', {
             showPagingToolbar: false,
             columnCfgs: [
                 { 
-                	text: "Test Case ID", dataIndex: "FormattedID", xtype: "templatecolumn",
-                	tpl: Ext.create("Rally.ui.renderer.template.FormattedIDTemplate"),
+                    text: "Test Case ID", dataIndex: "FormattedID", xtype: "templatecolumn",
+                    tpl: Ext.create("Rally.ui.renderer.template.FormattedIDTemplate"),
                 }, {
                     text: "Test Case Name", dataIndex: "Name", flex: 1
                 }, {
@@ -157,12 +156,10 @@ Ext.define('CustomApp', {
             scope: this
         });
     },
-
     _onClickExport: function(){
         var data = this._getCSV();
         window.location = 'data:text/csv;charset=utf8,' + encodeURIComponent(data);
     },
-    
     _getCSV: function () {
         var cols    = this._grid.columns;
         var data = '';
@@ -227,7 +224,7 @@ Ext.define('CustomApp', {
         }
         return text;
     },
-     _escapeForCSV: function(string) {
+    _escapeForCSV: function(string) {
         if (string.match(/,/)) {
             if (!string.match(/"/)) {
                 string = '"' + string + '"';
