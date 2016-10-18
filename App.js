@@ -99,7 +99,7 @@ Ext.define('CustomApp', {
                 var defectHtml = [];
                 _.each(this._defectsStore.data.items, function(defect) {
                     if (defect.data.TestCase && defect.data.TestCase.FormattedID === testcase.data.FormattedID) {
-                        defectHtml.push('<a href="' + Rally.nav.Manager.getDetailUrl(defect) + '">' + defect.data.FormattedID + "</a> - " + defect.data.State);
+                        defectHtml.push('<a href="' + Rally.nav.Manager.getDetailUrl(defect) + '" target="_blank">' + defect.data.FormattedID + "</a> - " + defect.data.State);
                     }
                 }, this);
                 testcase.set('OpenDefects', defectHtml.join("</br>"));
