@@ -26,6 +26,7 @@ Ext.define('CustomApp', {
             itemId: 'stateComboBox',
             allowNoEntry: true,
             noEntryText: 'All Releases',
+            value: 'All Releases',
             model: 'TestCase',
             listeners: {
                 scope: this,
@@ -89,10 +90,10 @@ Ext.define('CustomApp', {
     },
     _onDataLoaded: function(store, data) {
         _.each(data, function(testcase) {
-            if(testcase.data.c_Iteration) {
+            if (testcase.data.c_Iteration) {
                 testcase.set('Release', Number(testcase.data.c_Iteration.split('.')[0].replace(/\D+/g, '')));
             }
-            if(testcase.data.WorkProduct) {
+            if (testcase.data.WorkProduct) {
                 testcase.set('WorkProductNumericID', Number(testcase.data.WorkProduct.FormattedID.replace(/\D+/g, '')));
             }
             if (testcase.data.Defects && testcase.data.Defects.Count > 0) {
@@ -138,7 +139,7 @@ Ext.define('CustomApp', {
                         return "WorkProductNumericID";  
                     }
                 }, {
-                    text: "Test Case Last Run", dataIndex: "LastRun"
+                    text: "Test Case Last Run", dataIndex: "LastRun", xtype: 'datecolumn', format: 'D n/j/Y'
                 }, {
                     text: "Test Case Last Build", dataIndex: "LastBuild"
                 }, {
