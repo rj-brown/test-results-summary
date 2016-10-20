@@ -168,7 +168,6 @@ Ext.define('CustomApp', {
         _.each(cols, function(col) {
             data += this._getFieldTextAndEscape(col.text) + ',';
         }, this);
-        data += "Milestones,";
         data += "\r\n";
 
         _.each(this._testcases, function(record) {
@@ -195,20 +194,10 @@ Ext.define('CustomApp', {
                     data += this._getFieldTextAndEscape(record.get(fieldName)) + ',';
                 }
             }, this);
-            data += this._getMilestonesForCSV(record);
             data += "\r\n";
         }, this);
 
         return data;
-    },
-    _getMilestonesForCSV: function(testcases) {
-        var milestones = '';
-        if(testcases.data.WorkProduct) {
-            _.each(testcases.data.WorkProduct.Milestones._tagsNameArray, function(milestone) {
-                milestones += this._getFieldTextAndEscape(milestone.Name) + ' ';
-            }, this);
-        }
-        return milestones;
     },
     _getFieldTextAndEscape: function(fieldData) {
         var string  = this._getFieldText(fieldData);  
