@@ -153,14 +153,16 @@ Ext.define('CustomApp', {
         this.down('#exportBtn').add({
             xtype: 'rallybutton',
             text: 'Export to CSV',
-            handler: this._onClickExport,
+            href: 'data:text/csv;charset=utf8,' + encodeURIComponent(this._getCSV()),
+            id: 'exportButton',
             scope: this
         });
+        document.getElementById("exportButton").setAttribute("download","export.csv");
     },
-    _onClickExport: function(){
-        var data = this._getCSV();
-        window.location = 'data:text/csv;charset=utf8,' + encodeURIComponent(data);
-    },
+    // _onClickExport: function(){
+    //     var data = this._getCSV();
+    //     window.location = 'data:text/csv;charset=utf8,' + encodeURIComponent(data);
+    // },
     _getCSV: function () {
         var cols    = this._grid.columns;
         var data = '';
