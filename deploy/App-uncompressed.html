@@ -46,7 +46,7 @@
    },
     _getReleaseFilter: function() {
         return {
-            property: 'Release',
+            property: 'WorkProductRelease',
             operator: '=',
             value: Number(this.down('#stateComboBox').getRawValue().split(' (')[0].replace(/\D+/g, ''))
         };
@@ -62,48 +62,94 @@
         }
     },
     _initStore: function() {
-        this._defectsStore = Ext.create('Rally.data.wsapi.Store', {
-            model: 'Defect',
+        this._userStoryStore = Ext.create('Rally.data.wsapi.Store', {
+            model: 'UserStory',
             autoLoad: true,
             remoteSort: false,
-            fetch:[
+            fetch: [
                 "FormattedID",
-                "State",
-                "TestCase"
+                "Name",
+                "ScheduleState",
+                "Release",
+                "Feature"
             ],
             limit: Infinity
         });
-        this._defectsStore.on('load',function () {
-            Ext.create('Rally.data.wsapi.Store', {
-                model: 'TestCase',
+        this._userStoryStore.on('load',function () {
+            this._defectsStore = Ext.create('Rally.data.wsapi.Store', {
+                model: 'Defect',
                 autoLoad: true,
                 remoteSort: false,
                 fetch:[
-                    "FormattedID", 
-                    "Name",
-                    "Type",
-                    "LastRun",
-                    "LastVerdict",
-                    "LastBuild",
-                    "WorkProduct",
-                    "c_Iteration",
-                    "Defects"
+                    "FormattedID",
+                    "State",
+                    "TestCase",
+                    "Release"
                 ],
-                limit: Infinity,
-                listeners: {
-                    load: this._onDataLoaded,
-                    scope:this
-                }
+                limit: Infinity
             });
-       },this);
+            this._defectsStore.on('load',function () {
+                Ext.create('Rally.data.wsapi.Store', {
+                    model: 'TestCase',
+                    autoLoad: true,
+                    remoteSort: false,
+                    fetch:[
+                        "FormattedID", 
+                        "Name",
+                        "Type",
+                        "LastRun",
+                        "LastVerdict",
+                        "LastBuild",
+                        "WorkProduct",
+                        "c_Iteration",
+                        "Defects"
+                    ],
+                    limit: Infinity,
+                    listeners: {
+                        load: this._onDataLoaded,
+                        scope:this
+                    }
+                });
+           },this);
+        },this);
     },
     _onDataLoaded: function(store, data) {
         _.each(data, function(testcase) {
-            if (testcase.data.c_Iteration) {
-                testcase.set('Release', Number(testcase.data.c_Iteration.split('.')[0].replace(/\D+/g, '')));
-            }
             if (testcase.data.WorkProduct) {
                 testcase.set('WorkProductNumericID', Number(testcase.data.WorkProduct.FormattedID.replace(/\D+/g, '')));
+                
+                if (testcase.data.WorkProduct.FormattedID.indexOf("US") > -1) {
+                    _.each(this._userStoryStore.data.items, function(userStory) {
+                        if(userStory.data.FormattedID === testcase.data.WorkProduct.FormattedID) {
+                            if (userStory.data.ScheduleState) {
+                                testcase.set("WorkProductScheduleState", userStory.get("ScheduleState"));
+                            }
+                            if (userStory.data.Release) {
+                                testcase.set("WorkProductRelease", Number(userStory.get("Release").Name.replace(/\D+/g, '')));
+                            }
+                            if (userStory.data.Feature) {
+                                testcase.data.WorkProductFeatureID= [{
+                                    _ref: userStory.get("Feature")._ref, 
+                    	            FormattedID: userStory.get("Feature").FormattedID, 
+                                }];
+                                testcase.set("WorkProductFeatureName", userStory.get("Feature").Name);
+                            }
+                        }
+                    }, this);
+                }
+                
+                if (testcase.data.WorkProduct.FormattedID.indexOf("DE") > -1) {
+                    _.each(this._defectsStore.data.items, function(defect) {
+                        if(defect.data.FormattedID === testcase.data.WorkProduct.FormattedID) {
+                            if (defect.data.State) {
+                                testcase.set("WorkProductScheduleState", defect.get("State"));
+                            }
+                            if (defect.data.Release) {
+                                testcase.set("WorkProductRelease", Number(defect.get("Release").Name.replace(/\D+/g, '')));
+                            }
+                        }
+                    }, this);
+                }
             }
             if (testcase.data.Defects && testcase.data.Defects.Count > 0) {
                 var defectHtml = [];
@@ -148,6 +194,18 @@
                         return "WorkProductNumericID";  
                     }
                 }, {
+                    text: "Work Product State", dataIndex: "WorkProductScheduleState"
+                }, {
+                    text: "Feature ID", dataIndex: "WorkProductFeatureID",
+                    renderer: function(value) {
+                        return value ? '<a href="' + Rally.nav.Manager.getDetailUrl(value[0]) + '" target="_blank">' + value[0].FormattedID + "</a>" : void 0;
+                    },
+                    getSortParam: function() {
+                        return "WorkProductNumericID";  
+                    }
+                }, {
+                    text: "Feature Name", dataIndex: "WorkProductFeatureName"
+                }, {
                     text: "Test Case Last Run", dataIndex: "LastRun", xtype: 'datecolumn', format: 'D n/j/Y'
                 }, {
                     text: "Test Case Last Build", dataIndex: "LastBuild"
@@ -168,10 +226,6 @@
         });
         document.getElementById("exportButton").setAttribute("download","export.csv");
     },
-    // _onClickExport: function(){
-    //     var data = this._getCSV();
-    //     window.location = 'data:text/csv;charset=utf8,' + encodeURIComponent(data);
-    // },
     _getCSV: function () {
         var cols    = this._grid.columns;
         var data = '';
