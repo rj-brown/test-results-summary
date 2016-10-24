@@ -124,6 +124,7 @@ Ext.define('CustomApp', {
                     	            FormattedID: userStory.get("Feature").FormattedID, 
                                 }];
                                 testcase.set("WorkProductFeatureName", userStory.get("Feature").Name);
+                                testcase.set('WorkProductFeatureNumericID', Number(userStory.get("Feature").FormattedID.replace(/\D+/g, '')));
                             }
                         }
                     }, this);
@@ -192,7 +193,7 @@ Ext.define('CustomApp', {
                         return value ? '<a href="' + Rally.nav.Manager.getDetailUrl(value[0]) + '" target="_blank">' + value[0].FormattedID + "</a>" : void 0;
                     },
                     getSortParam: function() {
-                        return "WorkProductNumericID";  
+                        return "WorkProductFeatureNumericID";  
                     }
                 }, {
                     text: "Feature Name", dataIndex: "WorkProductFeatureName"
