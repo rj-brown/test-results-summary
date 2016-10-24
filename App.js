@@ -231,6 +231,8 @@ Ext.define('CustomApp', {
                 var fieldName = col.dataIndex;
                 if (fieldName ==="WorkProduct" && record.data.WorkProduct) {
                     data += this._getFieldTextAndEscape(record.data.WorkProduct.FormattedID) + ',';
+                } else if (fieldName ==="WorkProductFeatureID" && record.data.WorkProductFeatureID) {
+                     data += this._getFieldTextAndEscape(record.data.WorkProductFeatureID[0].FormattedID) + ',';
                 } else if (fieldName ==="LastRun") {
                     var lastRunText = '';
                     if (record.data.LastRun) {

@@ -144,7 +144,7 @@
                             if (defect.data.State) {
                                 testcase.set("WorkProductScheduleState", defect.get("State"));
                             }
-                            if (defect.data.Release) {
+                            if (defect.data.Release && defect.get("Release").Name) {
                                 testcase.set("WorkProductRelease", Number(defect.get("Release").Name.replace(/\D+/g, '')));
                             }
                         }
@@ -240,6 +240,8 @@
                 var fieldName = col.dataIndex;
                 if (fieldName ==="WorkProduct" && record.data.WorkProduct) {
                     data += this._getFieldTextAndEscape(record.data.WorkProduct.FormattedID) + ',';
+                } else if (fieldName ==="WorkProductFeatureID" && record.data.WorkProductFeatureID) {
+                     data += this._getFieldTextAndEscape(record.data.WorkProductFeatureID[0].FormattedID) + ',';
                 } else if (fieldName ==="LastRun") {
                     var lastRunText = '';
                     if (record.data.LastRun) {
